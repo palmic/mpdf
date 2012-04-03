@@ -2860,10 +2860,17 @@ function AddFont($family,$style='') {
 			$fh = fopen(_MPDF_TTFONTDATAPATH.$fontkey.'.cw.dat',"wb");
 			fwrite($fh,$cw,strlen($cw));
 			fclose($fh);
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cgm');
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.z');
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cw127.php');
-			@unlink(_MPDF_TTFONTDATAPATH.$fontkey.'.cw');
+			$filesToDelete = array(
+				_MPDF_TTFONTDATAPATH.$fontkey.'.cgm',
+				_MPDF_TTFONTDATAPATH.$fontkey.'.z',
+				_MPDF_TTFONTDATAPATH.$fontkey.'.cw127.php',
+				_MPDF_TTFONTDATAPATH.$fontkey.'.cw',
+			);
+			foreach ($filesToDelete as $fileToDelete) {
+				if (file_exists($fileToDelete)) {
+					@unlink($fileToDelete);
+				}
+			}
 		}
 		else if ($this->debugfonts) { $this->Error('Cannot write to the font caching directory - '._MPDF_TTFONTDATAPATH); }
 		unset($ttf);
@@ -16311,7 +16318,7 @@ function OpenTag($tag,$attr)
      case 'PAGEHEADER':
      case 'PAGEFOOTER':
 	$this->ignorefollowingspaces = true;
-	if ($attr['NAME']) { $pname = $attr['NAME']; }
+	if (isset($attr['NAME']) && $attr['NAME']) { $pname = $attr['NAME']; }
 	else { $pname = '_default'; }
 
 		if ($tag=='PAGEHEADER') { $p = &$this->pageheaders[$pname]; }
